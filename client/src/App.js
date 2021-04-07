@@ -1,51 +1,54 @@
 import React from 'react';
 import io from 'socket.io-client';
+import { v4 as uuidv4 } from 'uuid';
 
 class App extends React.Component {
-  state = {
-    tasks: [
-      {name:'dupka', id:1},
-      {name:'srobka', id:2},
-      {name:'fff', id:3}
-  ],
-  taskName: '',
-};
-
+  constructor(props) {
+      super(props);
+      this.state = {
+        tasks: [],
+        taskName: '',
+      };
+    }
   componentDidMount() {
     this.socket = io.connect("http://localhost:8000");
-    this.socket.on('removeTask', (id) => this.removeTask(id));
     this.socket.on('addTask', (task) => this.addTask(task));
+    this.socket.on('removeTask', (id) => this.removeTask(id));
+    this.socket.on('updateData', (tasks) => this.updateData(tasks));
   };
 
-  handleChange(event) {
-   this.setState({taskName: event.target.value});
- }
+  addTask(task){
+    this.setState({
+      tasks: [...this.state.tasks, task],
+      taskName: '',
+    })
+  };
 
-  removeTask(id){
+  removeTask(id, local){
+    if(local !== undefined){
+      this.socket.emit('removeTask', id);
+    }
     this.setState({
       tasks: this.state.tasks.filter(task => task.id !== id)
     })
-    this.socket.emit('removeTask', id);
-  }
+  };
+
+  updateData(tasks)  {
+    this.setState({
+      tasks: [...this.state.tasks] });
+  };
 
   submitForm(event){
      event.preventDefault();
      const newTask = {
-       name: this.state.taskName};
+       name: this.state.taskName,
+       id: uuidv4()};
      this.addTask(newTask);
      this.socket.emit('addTask', newTask);
      this.setState({
        task: [...this.state.tasks, newTask]
      })
-  }
-
-  addTask(task){
-    this.state.tasks.push(task);
-    this.setState({
-      tasks: this.state.tasks,
-    })
-  }
-
+  };
 
   render() {
     const {tasks, taskName} = this.state;
@@ -59,7 +62,7 @@ class App extends React.Component {
           <ul className="tasks-section__list" id="tasks-list">
           {tasks.map((task) =>(
             <li key={task.id} className="task">{task.name}<button className="btn btn--red"
-            onClick={() => this.removeTask(task.id)}>Remove</button></li>
+            onClick={(local) => this.removeTask(task.id, local)}>Remove</button></li>
           ))}
           </ul>
           <form id="add-task-form" onSubmit={(submit) => this.submitForm(submit)}>

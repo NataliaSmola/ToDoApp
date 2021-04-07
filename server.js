@@ -14,16 +14,18 @@ const io = socket(server);
 
 io.on('connection', (socket) => {
   io.to(socket.id).emit('updateData', tasks);
-
-  socket.on('addTask', (newTask) => {
-      console.log('New task:' + newTask + 'from' + socket.id);
-      tasks.push(newTask);
-      socket.broadcast.emit('addTask', newTask);
+  
+  socket.on('addTask', (task) => {
+      tasks.push(task);
+      socket.broadcast.emit('addTask', task);
+      console.log('Task array:', tasks);
+      console.log('New task:' , task ,' from ' + socket.id);
     });
 
-  socket.on('removeTask', (taskToRemove) => {
-    console.log('Please remove' + taskToRemove);
-    tasks.splice(taskToRemove, 1);
-    socket.broadcast.emit('removeTask', taskToRemove);
+  socket.on('removeTask', (removedTask) => {
+    console.log('Please remove ' + removedTask);
+    tasks.splice(removedTask, 1);
+    socket.broadcast.emit('removeTask', removedTask);
+    console.log('Task array:', tasks);
   });
 });
