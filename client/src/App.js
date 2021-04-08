@@ -10,6 +10,7 @@ class App extends React.Component {
         taskName: '',
       };
     }
+
   componentDidMount() {
     this.socket = io.connect("http://localhost:8000");
     this.socket.on('addTask', (task) => this.addTask(task));
@@ -35,7 +36,8 @@ class App extends React.Component {
 
   updateData(tasks)  {
     this.setState({
-      tasks: [...this.state.tasks] });
+      tasks:  tasks
+    });
   };
 
   submitForm(event){

@@ -14,7 +14,7 @@ const io = socket(server);
 
 io.on('connection', (socket) => {
   io.to(socket.id).emit('updateData', tasks);
-  
+
   socket.on('addTask', (task) => {
       tasks.push(task);
       socket.broadcast.emit('addTask', task);
